@@ -35,13 +35,13 @@ const thirdItem = new listItem({
 
 app.get("/", function(req, res) {
 
-  listItem.find({}, function(err, foundItems){
-    if (foundItems.length === 0){
+  listItem.find({}, function(err, foundItems) {
+    if (foundItems.length === 0) {
 
       const defaultItems = [firstItem, secondItem, thirdItem];
 
-      listItem.insertMany(defaultItems, function(err){
-        if (err){
+      listItem.insertMany(defaultItems, function(err) {
+        if (err) {
           console.log(err)
         } else {
           console.log('Successfully added items to your list!')
@@ -49,7 +49,10 @@ app.get("/", function(req, res) {
       });
       res.redirect("/");
     } else {
-      res.render("list", {listTitle: "Your To-Do List", newListItems: foundItems});
+      res.render("list", {
+        listTitle: "Your To-Do List",
+        newListItems: foundItems
+      });
     }
 
   });
@@ -62,11 +65,21 @@ app.post("/", function(req, res) {
   const newInsert = new listItem({
     name: item
   });
-    newInsert.save();
-    res.redirect("/");
+  newInsert.save();
+  res.redirect("/");
 });
 
-app.get("/about", function(req, res){
+app.post("/delete", function(req, res) {
+  const checkedItemId = req.body.checkedItem;
+  listItem.findByIdAndRemove(checkedItemId, function(err){
+    if (!err){
+      console.log('Successfully deleted item.');
+    }
+  });
+  res.redirect("/");
+});
+
+app.get("/about", function(req, res) {
   res.render("about");
 });
 

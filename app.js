@@ -2,7 +2,8 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
-const date = require(__dirname + "/date.js");
+const mongoose = require("mongoose");
+
 
 const app = express();
 
@@ -12,16 +13,45 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static("public"));
 
-const items = [];
-const workItems = [];
+
+mongoose.connect('mongodb://127.0.0.1:27017/todolistDB');
+
+const listItemSchema = new mongoose.Schema({
+  name: String
+});
+
+const listItem = mongoose.model('listItem', listItemSchema);
+
+const firstItem = new listItem({
+  name: 'Welcome to your To Do list!'
+});
+const secondItem = new listItem({
+  name: 'Select the + button to add a new item.'
+});
+const thirdItem = new listItem({
+  name: '<-- Check this to delete an item.'
+});
+
 
 app.get("/", function(req, res) {
 
-  const day = date.getDate();
+  listItem.find({}, function(err, foundItems){
+    if (foundItems.length === 0){
 
-  res.render("list", {
-    listTitle: day,
-    newListItems: items
+      const defaultItems = [firstItem, secondItem, thirdItem];
+
+      listItem.insertMany(defaultItems, function(err){
+        if (err){
+          console.log(err)
+        } else {
+          console.log('Successfully added items to your list!')
+        }
+      });
+      res.redirect("/");
+    } else {
+      res.render("list", {listTitle: "Your To-Do List", newListItems: foundItems});
+    }
+
   });
 });
 
@@ -29,26 +59,16 @@ app.get("/", function(req, res) {
 app.post("/", function(req, res) {
   const item = req.body.newItem;
 
-  if (req.body.list === "WorkList") {
-    workItems.push(item);
-    res.redirect("/work");
-  } else {
-    items.push(item);
+  const newInsert = new listItem({
+    name: item
+  });
+    newInsert.save();
     res.redirect("/");
-  };
-})
+});
 
 app.get("/about", function(req, res){
   res.render("about");
 });
-
-
-app.get("/work", function(req, res) {
-  res.render("list", {
-    listTitle: "WorkList",
-    newListItems: workItems
-  });
-})
 
 
 app.listen(3000, function() {

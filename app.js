@@ -3,6 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const _ = require("lodash");
 
 
 const app = express();
@@ -12,7 +13,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 
-mongoose.connect('mongodb://127.0.0.1:27017/todolistDB');
+mongoose.connect("mongodb://127.0.0.1:27017/todolistDB");
+//mongoose.connect("mongodb://localhost:27017/todolistDB");
 
 const itemsSchema = new mongoose.Schema({
   name: String
@@ -60,7 +62,7 @@ app.get("/", function(req, res) {
 });
 
 app.get("/:customListName", function(req, res){
-  const customListName = req.params.customListName;
+  const customListName = _.capitalize(req.params.customListName);
 
   List.findOne({name: customListName}, function(err, foundList){
     if (!err){
@@ -96,22 +98,30 @@ app.post("/", function(req, res) {
       foundList.items.push(item);
       foundList.save();
       res.redirect("/" + listName);
-    })
+    });
   }
 
 });
 
 app.post("/delete", function(req, res) {
   const checkedItemId = req.body.checkedItem;
+  const listName = req.body.listName;
 
-  //if listName == 'Today'
+  if (listName === "Today"){
+    Item.findByIdAndRemove(checkedItemId, function(err){
+      if (!err){
+        console.log('Successfully deleted item.');
+      }
+    });
+    res.redirect("/");
+  } else {
+    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, function(err, foundList){
+      if (!err){
+        res.redirect("/" + listName);
+      }
+    });
+  }
 
-  Item.findByIdAndRemove(checkedItemId, function(err){
-    if (!err){
-      console.log('Successfully deleted item.');
-    }
-  });
-  res.redirect("/");
 });
 
 

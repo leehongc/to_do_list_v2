@@ -62,7 +62,6 @@ app.get("/", function(req, res) {
     } else {
       res.render("list", {listTitle: "Today", newListItems: foundItems});
     }
-
   });
 });
 
@@ -87,6 +86,7 @@ app.get("/:customListName", function(req, res){
   });
 });
 
+
 app.post("/", function(req, res) {
   const itemName = req.body.newItem;
   const listName = req.body.list;
@@ -105,7 +105,6 @@ app.post("/", function(req, res) {
       res.redirect("/" + listName);
     });
   }
-
 });
 
 app.post("/delete", function(req, res) {
@@ -126,13 +125,8 @@ app.post("/delete", function(req, res) {
       }
     });
   }
-
 });
 
-
-app.get("/about", function(req, res) {
-  res.render("about");
-});
 
 let port = process.env.PORT;
 if (port == null || port == ""){

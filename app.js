@@ -103,6 +103,7 @@ app.post("/", function(req, res) {
     List.findOne({name: listName}, function(err, foundList){
       foundList.items.push(item);
       foundList.save();
+      console.log('Successfully added a custom item to your list!');
       res.redirect("/" + listName);
     });
   }
@@ -122,6 +123,7 @@ app.post("/delete", function(req, res) {
   } else {
     List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, function(err, foundList){
       if (!err){
+        console.log('Successfully deleted a custom item.');
         res.redirect("/" + listName);
       }
     });

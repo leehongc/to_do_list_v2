@@ -17,9 +17,9 @@ app.use(express.static("public"));
 const login = process.env.mongoClusterLogin;
 const password = process.env.mongoClusterPassword;
 
-mongoose.connect("mongodb+srv://" + login + ":" + password + "@cluster0.9z12g.mongodb.net/todolistDB");
+//mongoose.connect("mongodb+srv://" + login + ":" + password + "@cluster0.9z12g.mongodb.net/todolistDB");
 //mongoose.connect("mongodb://127.0.0.1:27017/todolistDB");
-//mongoose.connect("mongodb://localhost:27017/todolistDB");
+mongoose.connect("mongodb://localhost:27017/todolistDB");
 
 const itemsSchema = new mongoose.Schema({
   name: String
@@ -97,6 +97,7 @@ app.post("/", function(req, res) {
 
   if (listName === "Today"){
     item.save();
+    console.log('Successfully added an item to your list!');
     res.redirect("/");
   } else {
     List.findOne({name: listName}, function(err, foundList){
